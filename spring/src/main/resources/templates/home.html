@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<html lang="en" 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <title>IoT App - Home</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"/> 
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{/css/style.css}"/> 
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            IoT App
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}">Admin </a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+                <span sec:authentication="name"></span>
+                <a th:href="@{/login?logout}">logout</a>
+            </span>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <h5 class="card-header">My sensors</h5>
+                    <div class="card-body">
+                        <table class="table table-striped" th:if="${listSensor}">
+                            <tr>
+                                <th>Id</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Frequency</th>
+                                <th>Actions</th>
+                            </tr>
+                            <tr th:each="s:${listSensor}">
+                                <td th:text="${s.sensorId}">
+                                <td th:text="${s.location}"></td>
+                                <td th:text="${s.type}"></td>
+                                <td th:text="${s.frequency}"></td>
+                                <td>
+                                    <form th:action="@{/sensors}" method="GET">
+                                        <div>
+                                            <input type ="hidden" name="sensorId" th:value="${s.sensorId}"/>
+                                            <button type="submit" class="btn-secondary">Consult</button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="container">
+                            <ul class="nav nav-pills">
+                                <li class="nav-item" th:each="p,status:${sensorPages}">
+                                    <a class="nav-link" th:href="@{/consultSensor(sensorId=${sensorId}, page=${status.index})}" th:text="${status.index}"></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <form th:action="@{/addSensorToUser}" method="POST">
+                            <div>
+                                <label>Add a sensor to my list</label>
+                                <input type="text" name="newSensorId" th:value="${newSensorId}"/>
+                                <button type="submit" class="btn-secondary">Add</button>
+                                <div class="text-danger" th:if="${exeption2}" th:text="${exeption2.message}"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card" th:if="${sensor}">
+                    <h5 class="card-header">Sensor</h5>
+                    <div class="card-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Configuration</h5>
+                                <div>
+                                    <label>Id :</label>
+                                    <label th:text="${sensor.sensorId}"></label>
+                                </div>
+                                <div>
+                                    <label>Location :</label>
+                                    <label th:text="${sensor.location}"></label>
+                                </div>
+                                <div>
+                                    <label>Type of measure :</label>
+                                    <label th:text="${sensor.type}"></label>
+                                </div>
+                                <div>
+                                    <label>Frequency :</label>
+                                    <label th:text="${sensor.frequency}"></label>
+                                    <label>measures/day</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <form th:action="@{/changeFrequency(sensorId=${sensorId})}" method="POST">
+                                    <div>
+                                        <label>Change sensor frequency </label>
+                                        <input type="text" name="newFrequency" th:value="${newFrequency}"/>
+                                        <button type="submit" class="btn-secondary">Change</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Consult data for this sensor</h5>
+                                <form th:action="@{/data}" method="GET">
+                                    <div>
+                                        <label>From :</label>
+                                        <input id="d1" type="date" name="d1" th:value="${d1}"/>
+                                        <label>To :</label>
+                                        <input id="d2" type="date" name="d2" th:value="${d2}"/>
+                                        <input type="hidden" name="sensorId" th:value="${sensorId}"/>
+                                        <button type="submit" class="btn-secondary">Go</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
+    if(dd<10){
+            dd='0'+dd
+        } 
+        if(mm<10){
+            mm='0'+mm
+        } 
+    today = yyyy+'-'+mm+'-'+dd;
+    document.getElementById("d1").setAttribute("max", today);
+    document.getElementById("d1").setAttribute("value", today);
+    document.getElementById("d2").setAttribute("max", today);
+    document.getElementById("d2").setAttribute("value", today);
+</script> 
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html lang="en" 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <title>IoT App - Data</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"/> 
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{/css/style.css}"/> 
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            IoT App
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}">Admin </a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+                <span sec:authentication="name"></span>
+                <a th:href="@{/login?logout}">logout</a>
+            </span>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card" th:if="${sensor}">
+                            <h5 class="card-header">Sensor's Data</h5>
+                            <div class="card-body">
+                                <form th:action="@{/data}" method="GET">
+                                    <div>
+                                        <label>From :</label>
+                                        <input id="d1" type="date" name="d1" th:value="${d1}"/>
+                                        <label>To :</label>
+                                        <input id="d2" type="date" name="d2" th:value="${d2}"/>
+                                        <input type="hidden" name="sensorId" th:value="${sensorId}"/>
+                                        <button type="submit" class="btn-secondary">Go</button>
+                                        <div class="text-danger" th:if="${exeption}" th:text="${exeption.message}"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card" th:if="${sensor}">
+                            <h5 class="card-header">Configuration</h5>
+                            <div class="card-body">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 >Sensor</h5>
+                                        <div th:if="${sensor}">
+                                            <div>
+                                                <label>Id :</label>
+                                                <label th:text="${sensor.sensorId}"></label>
+                                            </div>
+                                            <div>
+                                                <label>Location :</label>
+                                                <label th:text="${sensor.location}"></label>
+                                            </div>
+                                            <div>
+                                                <label>Type of measure :</label>
+                                                <label th:text="${sensor.type}"></label>
+                                            </div>
+                                            <div>
+                                                <label>Frequency :</label>
+                                                <label th:text="${sensor.frequency}"></label>
+                                                <label>measures/day</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-9">
+                <div class="card">
+                    <h5 class="card-header">Data visualisation</h5>
+                    <div class="card-body">
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+                        <canvas id="line-chart" width="1400" height="450"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="card" th:if="${sensor}">
+                    <h5 class="card-header">Statistics</h5>
+                    <div class="card-body">
+                        <div th:if="${statistics}">
+                            <div>
+                                <label>Sensor :</label>
+                                <label th:text="${sensor.sensorId}"></label>
+                            </div>
+                            <div>
+                                <label>Type of measure :</label>
+                                <label th:text="${sensor.type}"></label>
+                            </div>
+                            <div>
+                                <label>From :</label>
+                                <label th:text="${statistics.d1}"></label>
+                            </div>
+                            <div>
+                                <label>To :</label>
+                                <label th:text="${statistics.d2}"></label>
+                            </div>
+                            <div>
+                                <label>Minimum :</label>
+                                <label th:text="${statistics.min + ' ' + statistics.unit}   "></label>
+                            </div>
+                            <div>
+                                <label>Maximum :</label>
+                                <label th:text="${statistics.max + ' ' + statistics.unit}    "></label>
+                            </div>
+                            <div>
+                                <label>Count :</label>
+                                <label th:text="${statistics.nb}"></label>
+                            </div>
+                            <div>
+                                <label>Average :</label>
+                                <label th:text="${statistics.average + ' ' + statistics.unit} "></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-9">
+                <div class="card" th:if="${sensor}">
+                    <h5 class="card-header">Measures</h5>
+                    <div class="card-body" th:if="${listMeasure}">
+                        <table class="table table-striped ">
+                            <tr>
+                                <th>Id</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Value</th>
+                            </tr>
+                            <tr th:each="m:${listMeasure}">
+                                <td th:text="${ m.measureId}">
+                                <td th:text="${m.type}"></td>
+                                <td th:text="${m.dateTaken}"></td>
+                                <td th:text="${m.value}"></td>
+                            </tr>
+                        </table>
+                        <div class="container">
+                            <ul class="nav nav-pills">
+                                <li class="nav-item" th:each="p,status:${measurePages}">
+                                    <a class="nav-link" th:href="@{/data(sensorId=${sensorId}, d1=${d1}, d2=${d2}, page=${status.index})}" th:text="${status.index}"></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        var jsonvalue = /*[[${jsonvalue}]]*/ 'default';
+        var dataTab = JSON.parse(jsonvalue);
+        var jsondate = /*[[${jsondate}]]*/ 'default';
+        var labelTab = JSON.parse(jsondate);
+        var average = /*[[${statistics.average}]]*/ 'default';
+        var sensorType = /*[[${sensor.type}]]*/ 'default';
+        var averageTab= Array.from(Array(labelTab.length)).fill(average);
+   
+    /*]]>*/
+    </script>
+
+<script> 
+
+    new Chart(document.getElementById("line-chart"), {
+  type: 'line',
+  data: {
+    labels: labelTab,
+    datasets: [{ 
+        data: dataTab,
+        label: "Values",
+        borderColor: "#3e95cd",
+        fill: false
+      }, { 
+        data: averageTab,
+        label: "Average",
+        borderColor: "#8e5ea2",
+        fill: false
+      }
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: sensorType
+    }
+  }
+});
+</script>
+</html>

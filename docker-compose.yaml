@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:13.1-alpine'
+    ports:
+      - "5432:5432"
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=pifou
+      - POSTGRES_PASSWORD=pasglop
+      - POSTGRES_DB=IoT
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    container_name: mosquitto
+  sensor:
+    image: vincentduboisdlc/algroup2-sensor
+    container_name: sensor
+    links:
+      - "mosquitto:mosquitto"
+    depends_on:
+      - mosquitto
+      - spring
+    environment:
+      - MOSQUITTO_HOST=tcp://mosquitto:1883
+  spring:
+    image: vincentduboisdlc/algroup2-spring
+    ports:
+      - "8082:8080"
+    container_name: spring
+    links:
+      - "mosquitto:mosquitto"
+    depends_on:
+      - postgres
+      - mosquitto
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/IoT

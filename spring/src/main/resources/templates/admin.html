@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html lang="en" 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <title>IoT App - Admin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"/> 
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" th:href="@{/css/style.css}"/> 
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            IoT App
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active" sec:authorize="hasRole('ROLE_ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}">Admin </a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+                <span sec:authentication="name"></span>
+                <a th:href="@{/login?logout}">logout</a>
+            </span>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <h5 class="card-header">Create new User</h5>
+                    <div class="card-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <form th:action="@{/newUser}" method="POST">
+                                    <div class="form-group">
+                                      <label for="userLogin">User Login</label>
+                                      <input type="text" class="form-control" id="userLogin" placeholder="New Login" name="newUserLogin" th:value="${newUserLogin}">
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="userPassword">User Password</label>
+                                      <input type="password" class="form-control" id="userPassword" placeholder="Password" name="newUserPassword" th:value="${newUserPassword}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="userName">User Name</label>
+                                        <input type="text" class="form-control" id="userName" placeholder="New User Name" name="newUserName" th:value="${newUserName}">
+                                      </div>
+                                    <button type="submit" class="btn btn-primary">Create</button>
+                                    <div class="text-danger" th:if="${exeption}" th:text="${exeption.message}"></div>
+                                </form>                          
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
